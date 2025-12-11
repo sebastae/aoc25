@@ -62,9 +62,3 @@ func MustReadInput() []string {
 
 	return lines
 }
-
-type Solution interface {
-	Name() string
-	Init(f string, l *log.Logger) error
-	Solve() ([]string, error)
-}
