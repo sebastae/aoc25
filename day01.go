@@ -30,25 +30,24 @@ func (dial *Dial) Move(dir Direction, distance int) int {
 }
 
 func (dial *Dial) MoveAndCountZeroPasses(dir Direction, distance int) int {
-	modDist := distance % dial.Positions
-	newPos := dial.CurrentPosition + modDist*int(dir)
-
 	// Each full cycle passes zero
 	timesPassedZero := distance / dial.Positions
-	if timesPassedZero > 0 {
-	}
 
-	if newPos < 0 {
-		newPos = dial.Positions + newPos
-		// Since we went negative we passed zero
-		timesPassedZero++
-	}
-	oldPos := dial.CurrentPosition
-	dial.CurrentPosition = newPos % dial.Positions
+	// After doing n complete cycles we still have a some distance left to rotate
+	if modDist := distance % dial.Positions; modDist > 0 {
+		newPosition := dial.CurrentPosition + (modDist * int(dir))
+		// From any non-zero position we can pass zero by
+		// - Moving left (negative) -> newPosition is either zero or negative
+		// - Moving right (positive) -> newPosition is greater or equal to the number of positions
+		if (dir == DirectionLeft && newPosition <= 0 && dial.CurrentPosition != 0) || (dir == DirectionRight && newPosition >= dial.Positions) {
+			timesPassedZero++
+		}
 
-	if dir == DirectionRight && dial.CurrentPosition < oldPos {
-		// We wrapped around and passed zero
-		timesPassedZero++
+		if newPosition < 0 {
+			dial.CurrentPosition = dial.Positions + newPosition
+		} else {
+			dial.CurrentPosition = newPosition % dial.Positions
+		}
 	}
 
 	return timesPassedZero
