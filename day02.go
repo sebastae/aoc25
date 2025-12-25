@@ -23,6 +23,27 @@ func (id ID) Valid() bool {
 	return true
 }
 
+func (id ID) HasRepeatingPattern() bool {
+	str := strconv.Itoa(int(id))
+	if len(str) < 2 {
+		return false
+	}
+
+	for pLen := 1; pLen <= len(str)/2; pLen++ {
+		if len(str)%pLen != 0 {
+			// The string length must be divisible by the pattern length for it to be able to be repeating
+			continue
+		}
+
+		repeatedPattern := strings.Repeat(str[0:pLen], len(str)/pLen)
+		if str == repeatedPattern {
+			return true
+		}
+	}
+
+	return false
+}
+
 type Range struct {
 	Start ID
 	End   ID
@@ -45,6 +66,17 @@ func (r *Range) GetInvalidIDs() []ID {
 		}
 	}
 	return invalidIDs
+}
+
+func (r *Range) GetRepeatingIDs() []ID {
+	ids := []ID{}
+	for _, id := range r.Expand() {
+		if id.HasRepeatingPattern() {
+			ids = append(ids, id)
+		}
+	}
+
+	return ids
 }
 
 func ParseRanges(lines []string, l *DebugLogger) ([]Range, error) {
@@ -95,4 +127,21 @@ func SolveDay2Part1(lines []string, l *DebugLogger) (int, error) {
 	}
 
 	return invalidIdsSum, nil
+}
+
+func SolveDay2Part2(lines []string, l *DebugLogger) (int, error) {
+	ranges, err := ParseRanges(lines, l)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing ranges: %w", err)
+	}
+
+	invalidSum := 0
+	for _, r := range ranges {
+		ids := r.GetRepeatingIDs()
+		for _, id := range ids {
+			invalidSum += int(id)
+		}
+	}
+
+	return invalidSum, nil
 }
