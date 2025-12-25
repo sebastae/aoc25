@@ -39,31 +39,6 @@ func ReadFile(fp string) ([]string, error) {
 	return ReadLines(f)
 }
 
-func ReadInput() ([]string, error) {
-	inputFile := "input.txt"
-	if len(os.Args) > 1 {
-		inputFile = os.Args[1]
-	}
-
-	file, err := os.Open(inputFile)
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	return ReadLines(file)
-}
-
-func MustReadInput() []string {
-	lines, err := ReadInput()
-	if err != nil {
-		log.Default().Fatalf("could not read input: %s\n", err)
-	}
-
-	return lines
-}
-
 // Debugging
 
 // DebugLogger wraps a logger with a Debug() print that only prints if its
