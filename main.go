@@ -8,7 +8,7 @@ import (
 )
 
 type SolverPart struct {
-	Solve         func(lines []string, logger *log.Logger) (int, error)
+	Solve         func(lines []string, logger *DebugLogger) (int, error)
 	ExampleResult int
 }
 
@@ -19,7 +19,7 @@ type Solver struct {
 }
 
 var solvers = map[string]Solver{
-	"Day1": {Parts: []SolverPart{SolverPart{SolveDay1Part1, 3}}, InputFile: "inputs/day01.txt", ExampleFile: "inputs/day01.example.txt"},
+	"Day1": {Parts: []SolverPart{{SolveDay1Part1, 3}, {SolveDay1Part2, 6}}, InputFile: "inputs/day01.txt", ExampleFile: "inputs/day01.example.txt"},
 }
 
 const errStr = "\033[0m[\033[1;31mERROR\033[0m]"
@@ -34,14 +34,14 @@ func RunSolver(solver *Solver, name string) ([]*SolverResult, error) {
 	fmt.Printf("\n\033[0;34m== [\033[1m%s\033[0;34m] ==\033[0m\n", name)
 
 	prefix := fmt.Sprintf("[\033[1;34m%s\033[0m]", name)
-	logger := log.New(os.Stdout, prefix+" ", 0)
+	logger := NewDebugLogger(os.Stdout, prefix+" ", 0, false)
 
 	if solver == nil {
 		return nil, fmt.Errorf("solver is nil")
 	}
 
 	// Run parts
-	testLogger := log.New(os.Stderr, fmt.Sprintf("%s [TEST] ", prefix), 0)
+	testLogger := NewDebugLogger(os.Stderr, fmt.Sprintf("%s [TEST] ", prefix), 0, true)
 	exampleLines, err := ReadFile(solver.ExampleFile)
 	if err != nil {
 		return nil, fmt.Errorf("could not read example file: %w", err)
@@ -62,8 +62,12 @@ func RunSolver(solver *Solver, name string) ([]*SolverResult, error) {
 			results = append(results, nil)
 			continue
 		} else {
-			testLogger.Printf("\033[0;32mSUCCESS\033[0m: part %d example completed with result { %d }", i+1, res)
 			result.Pass = res == part.ExampleResult
+			if result.Pass {
+				testLogger.Printf("\033[0;32mSUCCESS\033[0m: part %d example completed with result { %d }", i+1, res)
+			} else {
+				testLogger.Printf("\033[0;33mFAIL\033[0m: part %d expected example result %d, got %d", i+1, part.ExampleResult, res)
+			}
 		}
 
 		// Run actual solution

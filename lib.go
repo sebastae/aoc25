@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"log"
 	"os"
 )
@@ -61,4 +62,32 @@ func MustReadInput() []string {
 	}
 
 	return lines
+}
+
+// Debugging
+
+// DebugLogger wraps a logger with a Debug() print that only prints if its
+// debug flag is set
+type DebugLogger struct {
+	*log.Logger
+	isDebug bool
+}
+
+func (l *DebugLogger) Debug(v ...any) {
+	if l.isDebug {
+		l.Print(v...)
+	}
+}
+
+func (l *DebugLogger) Debugf(format string, v ...any) {
+	if l.isDebug {
+		l.Printf(format, v...)
+	}
+}
+
+func NewDebugLogger(out io.Writer, prefix string, flag int, isDebug bool) *DebugLogger {
+	return &DebugLogger{
+		Logger:  log.New(out, prefix, flag),
+		isDebug: isDebug,
+	}
 }
