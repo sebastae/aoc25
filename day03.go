@@ -21,14 +21,18 @@ type BatteryPosition struct {
 func (bank BatteryBank) GetMaxUsingN(n int) int {
 	out := 0
 
+	bank.l.Debugf("bank = %#v", bank.Batteries)
+
 	maxPos := BatteryPosition{-1, -1}
 	for p := n - 1; p >= 0; p-- {
-		for i, b := range bank.Batteries[maxPos.Index+1 : len(bank.Batteries)-p] {
+		startIndex := maxPos.Index + 1
+		for i, b := range bank.Batteries[startIndex : len(bank.Batteries)-p] {
 			if maxPos.Index < 0 || b > maxPos.Battery {
-				maxPos = BatteryPosition{i, b}
+				maxPos = BatteryPosition{startIndex + i, b}
 			}
 		}
 
+		bank.l.Debugf("add %d with power %d, index = %d", maxPos.Battery, p, maxPos.Index)
 		out += int(maxPos.Battery) * int(math.Pow10(p))
 		maxPos.Battery = -1
 	}
@@ -70,6 +74,23 @@ func (day03) SolvePart1(lines []string, l *DebugLogger) (int, error) {
 	}
 
 	const NumBatteriesActivePerBank = 2
+
+	battSum := 0
+	for _, bank := range banks {
+		battSum += bank.GetMaxUsingN(NumBatteriesActivePerBank)
+	}
+
+	return battSum, nil
+}
+
+func (day03) SolvePart2(lines []string, l *DebugLogger) (int, error) {
+
+	banks, err := Day03.ParseBatteryBanks(lines, l)
+	if err != nil {
+		return 0, fmt.Errorf("could not parse banks: %w", err)
+	}
+
+	const NumBatteriesActivePerBank = 12
 
 	battSum := 0
 	for _, bank := range banks {
