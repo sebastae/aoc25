@@ -20,6 +20,7 @@ type Solver struct {
 
 var solvers = map[string]Solver{
 	"Day1": {Parts: []SolverPart{{SolveDay1Part1, 3}, {SolveDay1Part2, 6}}, InputFile: "inputs/day01.txt", ExampleFile: "inputs/day01.example.txt"},
+	"Day2": {Parts: []SolverPart{{SolveDay2Part1, 1227775554}}, InputFile: "inputs/day02.txt", ExampleFile: "inputs/day02.example.txt"},
 }
 
 const errStr = "\033[0m[\033[1;31mERROR\033[0m]"
