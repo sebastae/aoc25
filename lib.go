@@ -66,3 +66,16 @@ func NewDebugLogger(out io.Writer, prefix string, flag int, isDebug bool) *Debug
 		isDebug: isDebug,
 	}
 }
+
+// Slice utils - higher order slice functions
+
+// Filter - return a slice with all items from a slice passing a predicate
+func Filter[T any](s []T, f func(i T) bool) []T {
+	res := []T{}
+	for _, i := range s {
+		if f(i) {
+			res = append(res, i)
+		}
+	}
+	return res
+}

@@ -22,9 +22,8 @@ var solvers = map[string]Solver{
 	"Day01": {Parts: []SolverPart{{SolveDay1Part1, 3}, {SolveDay1Part2, 6}}, InputFile: "inputs/day01.txt", ExampleFile: "inputs/day01.example.txt"},
 	"Day02": {Parts: []SolverPart{{SolveDay2Part1, 1227775554}, {SolveDay2Part2, 4174379265}}, InputFile: "inputs/day02.txt", ExampleFile: "inputs/day02.example.txt"},
 	"Day03": {Parts: []SolverPart{{Day03.SolvePart1, 357}, {Day03.SolvePart2, 3121910778619}}, InputFile: "inputs/day03.txt", ExampleFile: "inputs/day03.example.txt"},
+	"Day04": {Parts: []SolverPart{{Day04.SolvePart1, 13}}, InputFile: "inputs/day04.txt", ExampleFile: "inputs/day04.example.txt"},
 }
-
-const errStr = "\033[0m[\033[1;31mERROR\033[0m]"
 
 type SolverResult struct {
 	Result   int
