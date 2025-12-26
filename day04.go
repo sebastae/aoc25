@@ -53,10 +53,18 @@ func (g Grid) GetAdjacent(x, y int) ([]*Cell, error) {
 	return cells, nil
 }
 
+func (g Grid) IsAccessible(x, y int) (bool, error) {
+	adjacent, err := g.GetAdjacent(x, y)
+	if err != nil {
+		return false, err
+	}
+
+	return len(Filter(adjacent, func(c *Cell) bool { return c.Filled })) < MAX_FILLED_ADJACENT, nil
+}
+
+const MAX_FILLED_ADJACENT = 4
+
 func (g Grid) GetAccessibleFilledCells() (int, error) {
-
-	const MAX_FILLED_ADJACENT = 4
-
 	accessibleCells := 0
 	for y := 0; y < g.Height; y++ {
 		for x := 0; x < g.Width; x++ {
@@ -65,12 +73,9 @@ func (g Grid) GetAccessibleFilledCells() (int, error) {
 				return 0, fmt.Errorf("error getting grid-cell: %w", err)
 			}
 			if cell.Filled {
-				adjacent, err := g.GetAdjacent(x, y)
-				if err != nil {
-					return 0, fmt.Errorf("error getting adjacent cells: %w", err)
-				}
-
-				if len(Filter(adjacent, func(cell *Cell) bool { return cell.Filled })) < MAX_FILLED_ADJACENT {
+				if accessible, err := g.IsAccessible(x, y); err != nil {
+					return 0, err
+				} else if accessible {
 					accessibleCells++
 				}
 			}
@@ -78,6 +83,38 @@ func (g Grid) GetAccessibleFilledCells() (int, error) {
 	}
 
 	return accessibleCells, nil
+}
+
+func (g Grid) GetAndRemoveAccessibleFilledCells() (int, error) {
+	cells := []*Cell{}
+	for y := 0; y < g.Height; y++ {
+		for x := 0; x < g.Width; x++ {
+			cell, err := g.GetCell(x, y)
+			if err != nil {
+				return 0, fmt.Errorf("error getting cell (%d, %d): %w", x, y, err)
+			}
+
+			if !cell.Filled {
+				continue
+			}
+
+			accessible, err := g.IsAccessible(x, y)
+			if err != nil {
+				return 0, fmt.Errorf("error checking accessibility for cell (%d, %d): %w", x, y, err)
+			}
+
+			if accessible {
+				cells = append(cells, cell)
+			}
+		}
+	}
+
+	// Remove paper from grid cell
+	for _, cell := range cells {
+		cell.Filled = false
+	}
+
+	return len(cells), nil
 }
 
 type day04 struct{}
@@ -125,4 +162,30 @@ func (day04) SolvePart1(lines []string, l *DebugLogger) (int, error) {
 	}
 
 	return accessible, nil
+}
+
+func (day04) SolvePart2(lines []string, l *DebugLogger) (int, error) {
+	grid, err := Day04.ParseGrid(lines, l)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing grid: %w", err)
+	}
+
+	removedPaper := 0
+	for {
+		removed, err := grid.GetAndRemoveAccessibleFilledCells()
+		if err != nil {
+			return 0, fmt.Errorf("error removing paper: %w", err)
+		}
+
+		l.Debugf("removed %d paper", removed)
+
+		if removed == 0 {
+			break
+		}
+
+		removedPaper += removed
+
+	}
+
+	return removedPaper, nil
 }
